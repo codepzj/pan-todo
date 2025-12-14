@@ -5,8 +5,9 @@
     "output": "release"
   },
   "files": [
-    "dist",
-    "dist-electron"
+    "dist/**/*",
+    "dist-electron/**/*",
+    "package.json"
   ],
   "mac": {
     "category": "public.app-category.productivity",
