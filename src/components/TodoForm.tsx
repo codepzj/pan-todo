@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Check, X } from 'lucide-react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Textarea } from './ui/textarea'
