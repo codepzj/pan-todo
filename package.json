@@ -2,6 +2,10 @@
   "name": "pan-todo",
   "version": "1.0.0",
   "description": "Pan Todo - Eisenhower Matrix Desktop Application",
+  "author": {
+    "name": "Pan Todo Team",
+    "email": "contact@pantodo.app"
+  },
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
