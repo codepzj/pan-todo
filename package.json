@@ -6,6 +6,7 @@
     "name": "Pan Todo Team",
     "email": "contact@pantodo.app"
   },
+  "homepage": "https://github.com/codepzj/pan-todo",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
