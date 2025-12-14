@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Minimalist color scheme based on design document */
+    --background: 220 14% 98%; /* #F9FAFB - Light gray background */
+    --foreground: 220 26% 7%; /* #111827 - Deep gray text */
+    --card: 0 0% 100%; /* #FFFFFF - White cards */
+    --card-foreground: 220 26% 7%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 26% 7%;
+    --primary: 217 91% 60%; /* #3B82F6 - Blue accent */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 26% 7%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 220 26% 7%;
+    --destructive: 0 84% 60%; /* #EF4444 - Red for delete */
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%; /* #E5E7EB - Medium gray borders */
+    --input: 220 13% 91%;
+    --ring: 217 91% 60%;
+    --radius: 0.5rem;
+    
+    /* Custom spacing and typography variables */
+    --quadrant-padding: 1.5rem; /* 24px */
+    --card-margin: 0.5rem; /* 8px */
+    --card-padding: 0.75rem; /* 12px */
+    --button-padding-x: 0.75rem; /* 12px */
+    --button-padding-y: 0.5rem; /* 8px */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Typography styles based on design document */
+  .quadrant-title {
+    @apply text-base font-semibold; /* 16px, Semi-bold */
+  }
+  
+  .card-title {
+    @apply text-sm font-medium; /* 14px, Medium */
+  }
+  
+  .card-description {
+    @apply text-[13px] font-normal; /* 13px, Regular */
+  }
+  
+  .button-text {
+    @apply text-[13px] font-medium; /* 13px, Medium */
+  }
+}
+
+@layer components {
+  /* Smooth transitions for interactive elements */
+  .transition-smooth {
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  /* Focus visible styles for keyboard navigation */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+  
+  /* Custom scrollbar styling - minimal and elegant */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 10px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-300/35 rounded-full;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400/50;
+  }
+  
+  /* Firefox scrollbar */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(209, 213, 219, 0.35) transparent;
+    padding-right: 8px;
+  }
+}
