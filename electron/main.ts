@@ -1,11 +1,15 @@
 import { app, BrowserWindow } from 'electron'
 import path from 'path'
 import * as fs from 'fs/promises'
+import { fileURLToPath } from 'url'
 import { registerIpcHandlers } from './ipc-handlers'
 import { loadSettings, type AppSettings } from './storage'
+import { githubSync } from './github-sync'
+import { saveTodos, loadTodos } from './storage'
 
 // Define __dirname for ES modules
-const __dirname = path.dirname(new URL(import.meta.url).pathname)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 let mainWindow: BrowserWindow | null = null
 let floatingIcon: BrowserWindow | null = null
@@ -88,6 +92,11 @@ async function createWindow() {
   // Load saved window state
   const windowState = await loadWindowState()
 
+  // Get preload path - works in both dev and production
+  const preloadPath = app.isPackaged
+    ? path.join(app.getAppPath(), 'dist-electron', 'preload.js')
+    : path.join(__dirname, 'preload.js')
+
   mainWindow = new BrowserWindow({
     x: windowState.x,
     y: windowState.y,
@@ -96,10 +105,10 @@ async function createWindow() {
     minWidth: 800,
     minHeight: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: preloadPath,
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false, // 改为 false 以确保 preload 脚本能正常工作
+      sandbox: false,
     },
   })
 
@@ -111,7 +120,9 @@ async function createWindow() {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL)
     mainWindow.webContents.openDevTools()
   } else {
-    const indexPath = path.join(__dirname, '../dist/index.html')
+    const indexPath = app.isPackaged
+      ? path.join(app.getAppPath(), 'dist', 'index.html')
+      : path.join(__dirname, '../dist/index.html')
     console.log('Loading production build:', indexPath)
     mainWindow.loadFile(indexPath)
   }
@@ -153,7 +164,6 @@ app.whenReady().then(async () => {
   // Auto-sync: Pull from GitHub on startup
   if (appSettings.githubSync?.enabled && appSettings.githubSync.repo && appSettings.githubSync.token) {
     try {
-      const { githubSync } = await import('./github-sync')
       githubSync.configure({
         repo: appSettings.githubSync.repo,
         token: appSettings.githubSync.token,
@@ -161,7 +171,6 @@ app.whenReady().then(async () => {
       
       const result = await githubSync.pull()
       if (result.success && result.data) {
-        const { saveTodos } = await import('./storage')
         await saveTodos(result.data.todos || [])
         console.log('Auto-sync: Successfully pulled data from GitHub')
       }
@@ -193,9 +202,6 @@ app.on('before-quit', async (event) => {
   if (appSettings.githubSync?.enabled && appSettings.githubSync.repo && appSettings.githubSync.token) {
     try {
       event.preventDefault() // Prevent quit until sync completes
-      
-      const { githubSync } = await import('./github-sync')
-      const { loadTodos } = await import('./storage')
       
       githubSync.configure({
         repo: appSettings.githubSync.repo,

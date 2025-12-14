@@ -2,6 +2,7 @@ import { ipcMain, BrowserWindow, shell } from 'electron'
 import { v4 as uuidv4 } from 'uuid'
 import path from 'path'
 import { loadTodos, saveTodos, TodoItem, getStoragePath, loadSettings, updateSettings } from './storage'
+import { githubSync, GitHubSync } from './github-sync'
 
 /**
  * Retry a function with exponential backoff
@@ -215,7 +216,6 @@ export function registerIpcHandlers(
       
       // Handle GitHub sync configuration change
       if ('githubSync' in updates && updates.githubSync) {
-        const { githubSync } = await import('./github-sync')
         if (updates.githubSync.enabled && updates.githubSync.repo && updates.githubSync.token) {
           githubSync.configure({
             repo: updates.githubSync.repo,
@@ -234,7 +234,6 @@ export function registerIpcHandlers(
   // Handler: Test GitHub connection
   ipcMain.handle('github:test', async (_event, config: any) => {
     try {
-      const { githubSync } = await import('./github-sync')
       githubSync.configure(config)
       return await githubSync.testConnection()
     } catch (error: any) {
@@ -246,7 +245,6 @@ export function registerIpcHandlers(
   // Handler: Create GitHub repo
   ipcMain.handle('github:createRepo', async (_event, repoName: string, token: string) => {
     try {
-      const { GitHubSync } = await import('./github-sync')
       const sync = new GitHubSync()
       sync.configure({ repo: '', token })
       return await sync.createRepo(repoName)
@@ -259,7 +257,6 @@ export function registerIpcHandlers(
   // Handler: Push to GitHub
   ipcMain.handle('github:push', async () => {
     try {
-      const { githubSync } = await import('./github-sync')
       const todos = await loadTodos()
       const data = {
         todos,
@@ -276,7 +273,6 @@ export function registerIpcHandlers(
   // Handler: Pull from GitHub
   ipcMain.handle('github:pull', async () => {
     try {
-      const { githubSync } = await import('./github-sync')
       const result = await githubSync.pull()
       if (result.success && result.data) {
         // 保存拉取的数据

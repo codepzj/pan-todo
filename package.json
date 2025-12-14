@@ -1,6 +1,6 @@
 {
   "name": "pan-todo",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Pan Todo - Eisenhower Matrix Desktop Application",
   "author": {
     "name": "Pan Todo Team",
@@ -49,6 +49,7 @@
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
     "@vitejs/plugin-react": "^4.2.1",
+    "asar": "^3.2.0",
     "autoprefixer": "^10.4.16",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",

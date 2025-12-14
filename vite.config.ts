@@ -27,7 +27,13 @@ export default defineConfig(({ mode }) => ({
                 fileName: () => 'main.js',
               },
               rollupOptions: {
-                external: ['electron', 'path', 'fs', 'fs/promises']
+                external: [
+                  'electron',
+                  'path',
+                  'fs',
+                  'fs/promises',
+                  /^node:.*/
+                ]
               }
             },
           },
