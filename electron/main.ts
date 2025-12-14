@@ -149,6 +149,26 @@ app.whenReady().then(async () => {
     mainWindow.show()
     mainWindow.focus()
   }
+  
+  // Auto-sync: Pull from GitHub on startup
+  if (appSettings.githubSync?.enabled && appSettings.githubSync.repo && appSettings.githubSync.token) {
+    try {
+      const { githubSync } = await import('./github-sync')
+      githubSync.configure({
+        repo: appSettings.githubSync.repo,
+        token: appSettings.githubSync.token,
+      })
+      
+      const result = await githubSync.pull()
+      if (result.success && result.data) {
+        const { saveTodos } = await import('./storage')
+        await saveTodos(result.data.todos || [])
+        console.log('Auto-sync: Successfully pulled data from GitHub')
+      }
+    } catch (error) {
+      console.error('Auto-sync pull failed:', error)
+    }
+  }
 })
 
 // Quit when all windows are closed (except on macOS)
@@ -165,9 +185,38 @@ app.on('activate', () => {
   }
 })
 
-// Save window state before quit
-app.on('before-quit', () => {
+// Save window state before quit and auto-sync
+app.on('before-quit', async (event) => {
   saveWindowState()
+  
+  // Auto-sync: Push to GitHub on quit
+  if (appSettings.githubSync?.enabled && appSettings.githubSync.repo && appSettings.githubSync.token) {
+    try {
+      event.preventDefault() // Prevent quit until sync completes
+      
+      const { githubSync } = await import('./github-sync')
+      const { loadTodos } = await import('./storage')
+      
+      githubSync.configure({
+        repo: appSettings.githubSync.repo,
+        token: appSettings.githubSync.token,
+      })
+      
+      const todos = await loadTodos()
+      const data = {
+        todos,
+        version: '1.0.0',
+        lastModified: new Date().toISOString(),
+      }
+      
+      await githubSync.push(data)
+      console.log('Auto-sync: Successfully pushed data to GitHub')
+    } catch (error) {
+      console.error('Auto-sync push failed:', error)
+    } finally {
+      app.exit() // Now actually quit
+    }
+  }
 })
 
 // Export for IPC handlers (will be used in task 3.3)

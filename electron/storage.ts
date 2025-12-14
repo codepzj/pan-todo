@@ -79,12 +79,25 @@ export async function saveTodos(todos: TodoItem[]): Promise<void> {
 // App Settings
 // ============================================================================
 
+export interface GitHubSyncConfig {
+  enabled: boolean
+  repo: string
+  token: string
+  lastSyncTime?: number
+}
+
 export interface AppSettings {
   showFloatingIcon: boolean
+  githubSync?: GitHubSyncConfig
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
   showFloatingIcon: true,
+  githubSync: {
+    enabled: false,
+    repo: '',
+    token: '',
+  },
 }
 
 /**

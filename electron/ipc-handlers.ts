@@ -212,10 +212,80 @@ export function registerIpcHandlers(
     try {
       const newSettings = await updateSettings(updates)
       setSettings(newSettings)
+      
+      // Handle GitHub sync configuration change
+      if ('githubSync' in updates && updates.githubSync) {
+        const { githubSync } = await import('./github-sync')
+        if (updates.githubSync.enabled && updates.githubSync.repo && updates.githubSync.token) {
+          githubSync.configure({
+            repo: updates.githubSync.repo,
+            token: updates.githubSync.token,
+          })
+        }
+      }
+      
       return newSettings
     } catch (error: any) {
       console.error('Failed to update settings:', error.message)
       throw error
+    }
+  })
+
+  // Handler: Test GitHub connection
+  ipcMain.handle('github:test', async (_event, config: any) => {
+    try {
+      const { githubSync } = await import('./github-sync')
+      githubSync.configure(config)
+      return await githubSync.testConnection()
+    } catch (error: any) {
+      console.error('Failed to test GitHub connection:', error.message)
+      return { success: false, message: error.message }
+    }
+  })
+
+  // Handler: Create GitHub repo
+  ipcMain.handle('github:createRepo', async (_event, repoName: string, token: string) => {
+    try {
+      const { GitHubSync } = await import('./github-sync')
+      const sync = new GitHubSync()
+      sync.configure({ repo: '', token })
+      return await sync.createRepo(repoName)
+    } catch (error: any) {
+      console.error('Failed to create GitHub repo:', error.message)
+      return { success: false, message: error.message }
+    }
+  })
+
+  // Handler: Push to GitHub
+  ipcMain.handle('github:push', async () => {
+    try {
+      const { githubSync } = await import('./github-sync')
+      const todos = await loadTodos()
+      const data = {
+        todos,
+        version: '1.0.0',
+        lastModified: new Date().toISOString(),
+      }
+      return await githubSync.push(data)
+    } catch (error: any) {
+      console.error('Failed to push to GitHub:', error.message)
+      return { success: false, message: error.message }
+    }
+  })
+
+  // Handler: Pull from GitHub
+  ipcMain.handle('github:pull', async () => {
+    try {
+      const { githubSync } = await import('./github-sync')
+      const result = await githubSync.pull()
+      if (result.success && result.data) {
+        // 保存拉取的数据
+        await saveTodos(result.data.todos || [])
+      }
+      return result
+    } catch (error: any) {
+      console.error('Failed to pull from GitHub:', error.message)
+      return { success: false, message: error.message }
     }
   })
 }

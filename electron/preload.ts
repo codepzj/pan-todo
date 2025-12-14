@@ -1,8 +1,16 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type { TodoItem } from './storage'
 
+export interface GitHubSyncConfig {
+  enabled: boolean
+  repo: string
+  token: string
+  lastSyncTime?: number
+}
+
 export interface AppSettings {
   showFloatingIcon: boolean
+  githubSync?: GitHubSyncConfig
 }
 
 // Define the API interface for type safety
@@ -24,6 +32,13 @@ export interface ElectronAPI {
   settings: {
     get: () => Promise<AppSettings>
     update: (updates: Partial<AppSettings>) => Promise<AppSettings>
+  }
+  // GitHub sync operations
+  github: {
+    test: (config: { repo: string; token: string }) => Promise<{ success: boolean; message: string }>
+    createRepo: (repoName: string, token: string) => Promise<{ success: boolean; message: string; repo?: string }>
+    push: () => Promise<{ success: boolean; message: string; lastSyncTime?: number }>
+    pull: () => Promise<{ success: boolean; message: string; data?: any }>
   }
   // Window operations
   window: {
@@ -50,6 +65,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   settings: {
     get: () => ipcRenderer.invoke('settings:get'),
     update: (updates: Partial<AppSettings>) => ipcRenderer.invoke('settings:update', updates),
+  },
+  github: {
+    test: (config: { repo: string; token: string }) => ipcRenderer.invoke('github:test', config),
+    createRepo: (repoName: string, token: string) => ipcRenderer.invoke('github:createRepo', repoName, token),
+    push: () => ipcRenderer.invoke('github:push'),
+    pull: () => ipcRenderer.invoke('github:pull'),
   },
   window: {
     minimize: () => ipcRenderer.send('window:minimize'),
